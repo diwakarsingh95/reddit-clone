@@ -15,5 +15,5 @@ export default defineConfig({
   dbName: "reddit-clone",
   user: "postgres",
   password: "password",
-  debug: NODE_ENV === "development",
+  debug: NODE_ENV === "development"
 }) as Parameters<typeof MikroORM.init>[0];

@@ -5,7 +5,14 @@ import mikroOrmConfig from "../mikro-orm.config";
   const orm = await MikroORM.init(mikroOrmConfig);
   try {
     const migrator = orm.getMigrator();
-    await migrator.createMigration(undefined, undefined, true);
+    try {
+      await migrator.createInitialMigration();
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      }
+      await migrator.createMigration();
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);

@@ -15,6 +15,15 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz(0)",
@@ -23,6 +32,7 @@
           "primary": false,
           "nullable": false,
           "length": 0,
+          "default": "now()",
           "mappedType": "datetime"
         },
         "updated_at": {
@@ -33,16 +43,8 @@
           "primary": false,
           "nullable": false,
           "length": 0,
+          "default": "now()",
           "mappedType": "datetime"
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "text"
         }
       },
       "name": "posts",

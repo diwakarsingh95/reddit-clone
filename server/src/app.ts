@@ -6,9 +6,10 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { buildSchema } from "type-graphql";
-import { MyContext } from "./utils/context";
 import { connectDatabase } from "./db";
+import { MyContext } from "./utils/types";
 import { StatusResolver } from "./resolvers/status.resolver";
+import { PostResolver } from "./resolvers/post.resolver";
 
 const PORT = process.env.PORT || 8080;
 
@@ -35,7 +36,7 @@ export default class App {
     try {
       const apolloServer = new ApolloServer({
         schema: await buildSchema({
-          resolvers: [StatusResolver],
+          resolvers: [StatusResolver, PostResolver],
         }),
         plugins: [
           ApolloServerPluginDrainHttpServer({ httpServer: this.server }),

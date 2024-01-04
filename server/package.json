@@ -4,11 +4,12 @@
   "description": "Reddit-Clone server",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon",
+    "dev": "nodemon",
     "build": "rimraf ./dist && tsc",
-    "prestart": "yarn migrate && yarn build",
+    "prestart": "yarn build && yarn migrate:prod",
     "start": "cross-env NODE_ENV=production node ./dist/index.js",
-    "migrate": "ts-node ./src/db/migrate.ts"
+    "migrate": "ts-node ./src/db/migrate.ts",
+    "migrate:prod": "cross-env NODE_ENV=production node ./dist/db/migrate.js"
   },
   "keywords": [],
   "author": "Diwakar",
