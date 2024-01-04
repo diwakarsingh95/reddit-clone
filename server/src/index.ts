@@ -9,11 +9,6 @@ const main = async () => {
   if (migrations && migrations.length > 0) {
     await migrator.up();
   }
-
-  const em = orm.em.fork();
-
-  const post = em.create(Post, { title: "First Post" });
-  await em.persistAndFlush(post);
 };
 
 main();
