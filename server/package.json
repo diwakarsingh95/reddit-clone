@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "rimraf ./dist && tsc",
-    "prestart": "yarn build && cross-env NODE_ENV=production yarn migrate",
+    "prestart": "yarn migrate && yarn build",
     "start": "cross-env NODE_ENV=production node ./dist/index.js",
     "migrate": "ts-node ./src/db/migrate.ts"
   },
