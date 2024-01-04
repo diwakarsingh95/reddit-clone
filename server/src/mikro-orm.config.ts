@@ -11,9 +11,9 @@ export default defineConfig({
   },
   entities: ["dist/entities/**/*.entity.js"],
   entitiesTs: ["src/entities/**/*.entity.ts"],
-  tsNode: NODE_ENV !== "production",
+  tsNode: NODE_ENV === "development",
   dbName: "reddit-clone",
   user: "postgres",
   password: "password",
-  debug: NODE_ENV !== "production",
+  debug: NODE_ENV === "development",
 }) as Parameters<typeof MikroORM.init>[0];
