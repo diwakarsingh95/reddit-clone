@@ -10,6 +10,7 @@ import { connectDatabase } from "./db";
 import { MyContext } from "./utils/types";
 import { StatusResolver } from "./resolvers/status.resolver";
 import { PostResolver } from "./resolvers/post.resolver";
+import { UserResolver } from "./resolvers/user.resolver";
 
 const PORT = process.env.PORT || 8080;
 
@@ -36,7 +37,7 @@ export default class App {
     try {
       const apolloServer = new ApolloServer({
         schema: await buildSchema({
-          resolvers: [StatusResolver, PostResolver],
+          resolvers: [StatusResolver, PostResolver, UserResolver],
         }),
         plugins: [
           ApolloServerPluginDrainHttpServer({ httpServer: this.server }),
