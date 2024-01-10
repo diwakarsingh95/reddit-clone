@@ -1,4 +1,4 @@
-import { Arg, Ctx, Field, InputType, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
 import argon2 from "argon2";
 import { User } from "../entities/user.entity";
 import { MyContext } from "../utils/types";
@@ -16,6 +16,22 @@ export class UserResolver {
     if (existingUser) throw Error("Username already exists.");
     const hasedPassword = await argon2.hash(password);
     const user = em.create(User, { username, email, password: hasedPassword });
+    await em.persistAndFlush(user);
+    return user;
+  }
+
+  @Mutation(() => User)
+  async login(
+    @Arg("email") email: string,
+    @Arg("password") password: string,
+    @Ctx() { em }: MyContext
+  ): Promise<User> {
+    const user = await em.findOne(User, { email });
+    if (!user) throw Error("No user found.");
+
+    const isValid = await argon2.verify(user.password, password);
+    if (!isValid) throw Error("Invalid username or password.");
+
     await em.persistAndFlush(user);
     return user;
   }
