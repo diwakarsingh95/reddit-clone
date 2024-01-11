@@ -32,7 +32,6 @@ export class UserResolver {
     const isValid = await argon2.verify(user.password, password);
     if (!isValid) throw Error("Invalid username or password.");
 
-    await em.persistAndFlush(user);
     return user;
   }
 }
