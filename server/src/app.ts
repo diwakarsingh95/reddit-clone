@@ -11,6 +11,21 @@ import { MyContext } from "./utils/types";
 import { StatusResolver } from "./resolvers/status.resolver";
 import { PostResolver } from "./resolvers/post.resolver";
 import { UserResolver } from "./resolvers/user.resolver";
+import RedisStore from "connect-redis";
+import session from "express-session";
+import { createClient } from "redis";
+import { NODE_ENV } from "./utils/constants";
+
+// Initialize client.
+const redisClient = createClient();
+redisClient.connect().catch(console.error);
+
+// Initialize store.
+const redisStore = new RedisStore({
+  client: redisClient,
+  prefix: "myapp:",
+  disableTouch: true,
+});
 
 const PORT = process.env.PORT || 8080;
 
@@ -30,6 +45,22 @@ export default class App {
         methods: ["POST"],
         credentials: true,
         origin: "http://localhost:5173",
+      })
+    );
+    // Initialize sesssion storage.
+    this.host.use(
+      session({
+        name: "qid",
+        store: redisStore,
+        resave: false, // required: force lightweight session keep alive (touch)
+        saveUninitialized: false, // recommended: only save session when data exists
+        secret: "keyboard cat",
+        cookie: {
+          maxAge: 1000 * 60 * 60 * 24 * 365, // 1 Year
+          httpOnly: true,
+          secure: NODE_ENV === "production",
+          sameSite: "strict",
+        },
       })
     );
     this.server = createServer(this.host);
