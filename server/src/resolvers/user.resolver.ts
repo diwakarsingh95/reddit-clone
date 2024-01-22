@@ -10,13 +10,14 @@ export class UserResolver {
     @Arg("username") username: string,
     @Arg("email") email: string,
     @Arg("password") password: string,
-    @Ctx() { em }: MyContext
+    @Ctx() { req, em }: MyContext
   ) {
     const existingUser = await em.findOne(User, { username, email });
     if (existingUser) throw Error("Username already exists.");
     const hasedPassword = await argon2.hash(password);
     const user = em.create(User, { username, email, password: hasedPassword });
     await em.persistAndFlush(user);
+    req.session.user = { id: user.id };
     return user;
   }
 
@@ -24,7 +25,7 @@ export class UserResolver {
   async login(
     @Arg("email") email: string,
     @Arg("password") password: string,
-    @Ctx() { em }: MyContext
+    @Ctx() { req, em }: MyContext
   ): Promise<User> {
     const user = await em.findOne(User, { email });
     if (!user) throw Error("No user found.");
@@ -32,6 +33,7 @@ export class UserResolver {
     const isValid = await argon2.verify(user.password, password);
     if (!isValid) throw Error("Invalid username or password.");
 
+    req.session.user = { id: user.id };
     return user;
   }
 }

@@ -7,58 +7,74 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { buildSchema } from "type-graphql";
 import { connectDatabase } from "./db";
-import { MyContext } from "./utils/types";
+import { MyContext, User } from "./utils/types";
 import { StatusResolver } from "./resolvers/status.resolver";
 import { PostResolver } from "./resolvers/post.resolver";
 import { UserResolver } from "./resolvers/user.resolver";
 import RedisStore from "connect-redis";
 import session from "express-session";
-import { createClient } from "redis";
-import { NODE_ENV } from "./utils/constants";
+import { RedisClientType, createClient } from "redis";
+import {
+  PORT,
+  SESSION_MAX_AGE,
+  SESSION_SECRET,
+  __prod__,
+} from "./utils/constants";
 
-// Initialize client.
-const redisClient = createClient();
-redisClient.connect().catch(console.error);
-
-// Initialize store.
-const redisStore = new RedisStore({
-  client: redisClient,
-  prefix: "myapp:",
-  disableTouch: true,
-});
-
-const PORT = process.env.PORT || 8080;
+declare module "express-session" {
+  interface SessionData {
+    user: User;
+  }
+}
 
 export default class App {
   public orm!: MikroORM<IDatabaseDriver<Connection>>;
   public host!: express.Application;
   public server!: Server;
+  private redisClient!: RedisClientType;
+  private redisStore!: RedisStore;
+  private corsOriginWhitelist!: [
+    "http://localhost:5173",
+    "https://sandbox.embed.apollographql.com"
+  ];
 
-  public connect = async () => {
+  public connectDB = async () => {
     this.orm = await connectDatabase();
+  };
+
+  public connectRedis = async () => {
+    this.redisClient = createClient();
+    await this.redisClient.connect();
   };
 
   public init = async () => {
     this.host = express();
+    // Redis Store
+    this.redisStore = new RedisStore({
+      client: this.redisClient,
+      prefix: "myapp:",
+      disableTouch: true,
+    });
+    // CORS
     this.host.use(
       cors({
         methods: ["POST"],
         credentials: true,
-        origin: "http://localhost:5173",
+        origin: this.corsOriginWhitelist,
       })
     );
     // Initialize sesssion storage.
     this.host.use(
       session({
-        name: "qid",
-        store: redisStore,
+        name: "sid",
+        store: this.redisStore,
         resave: false, // required: force lightweight session keep alive (touch)
         saveUninitialized: false, // recommended: only save session when data exists
-        secret: "keyboard cat",
+        secret: SESSION_SECRET,
         cookie: {
-          maxAge: 1000 * 60 * 60 * 24 * 365, // 1 Year
+          maxAge: SESSION_MAX_AGE,
           httpOnly: true,
-          secure: NODE_ENV === "production",
+          secure: __prod__,
           sameSite: "strict",
         },
       })

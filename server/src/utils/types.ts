@@ -6,3 +6,8 @@ export interface MyContext {
   res: Response;
   em: EntityManager<IDatabaseDriver<Connection>>;
 }
+
+export type User = {
+  id: number;
+  email?: string;
+};
